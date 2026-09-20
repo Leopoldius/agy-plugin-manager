@@ -8,7 +8,7 @@ if ($UserPath) {
     $Filtered = @(
         $UserPath -split ";" |
         Where-Object {
-            $_ -and ($_.TrimEnd("\") -ine $BinDir.TrimEnd("\"))
+            $_ -and ($_.TrimEnd([char]92) -ine $BinDir.TrimEnd([char]92))
         }
     )
     [Environment]::SetEnvironmentVariable(

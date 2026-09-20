@@ -65,7 +65,7 @@ if ($UserPath) {
 
 $AlreadyPresent = $false
 foreach ($Entry in $Entries) {
-    if ($Entry.TrimEnd("\") -ieq $BinDir.TrimEnd("\")) {
+    if ($Entry.TrimEnd([char]92) -ieq $BinDir.TrimEnd([char]92)) {
         $AlreadyPresent = $true
         break
     }
@@ -81,7 +81,7 @@ if (-not $AlreadyPresent) {
 }
 
 $CurrentEntries = @($env:Path -split ";")
-if (-not ($CurrentEntries | Where-Object { $_.TrimEnd("\") -ieq $BinDir.TrimEnd("\") })) {
+if (-not ($CurrentEntries | Where-Object { $_.TrimEnd([char]92) -ieq $BinDir.TrimEnd([char]92) })) {
     $env:Path = "$BinDir;$env:Path"
 }
 
