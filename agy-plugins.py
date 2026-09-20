@@ -11,7 +11,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.4"
+VERSION = "0.5"
 VALID_STATES = {"on", "off", "keep"}
 AUTO_VALUE = "auto"
 
@@ -495,6 +495,254 @@ def print_nested(
         print("  <no plugin directories found>")
 
 
+
+def canonical_name(value: str) -> str:
+    return value.strip().lower().replace("_", "-")
+
+
+def find_named_directory(root: Path, requested: str, label: str) -> Path:
+    if not root.is_dir():
+        raise FileNotFoundError(f"{label} directory not found: {root}")
+
+    exact = root / requested
+    if exact.is_dir():
+        return exact
+
+    wanted = canonical_name(requested)
+    matches = sorted(
+        (
+            path
+            for path in root.iterdir()
+            if path.is_dir() and canonical_name(path.name) == wanted
+        ),
+        key=lambda path: path.name.lower(),
+    )
+
+    if len(matches) == 1:
+        return matches[0]
+
+    if len(matches) > 1:
+        choices = ", ".join(path.name for path in matches)
+        raise ValueError(
+            f"Ambiguous {label.lower()} '{requested}'. Matches: {choices}"
+        )
+
+    available = ", ".join(
+        sorted(path.name for path in root.iterdir() if path.is_dir())
+    ) or "<none>"
+    raise FileNotFoundError(
+        f"{label} '{requested}' not found under {root}. "
+        f"Available: {available}"
+    )
+
+
+def extract_markdown_summary(path: Path) -> str:
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except OSError as exc:
+        raise OSError(f"Could not read short description: {path}") from exc
+
+    lines = text.splitlines()
+    start = None
+
+    for index, line in enumerate(lines):
+        if line.strip().lower() == "## summary":
+            start = index + 1
+            break
+
+    if start is None:
+        raise ValueError(
+            f"Short description has no '## Summary' section: {path}"
+        )
+
+    collected = []
+
+    for line in lines[start:]:
+        if line.startswith("## "):
+            break
+        collected.append(line)
+
+    summary = "\n".join(collected).strip()
+
+    if not summary:
+        raise ValueError(f"Short description is empty: {path}")
+
+    return summary
+
+
+def find_short_description(plugin_name: str, skill_name: str) -> Path:
+    docs_root = script_dir() / "docs" / "plugins"
+
+    if not docs_root.is_dir():
+        raise FileNotFoundError(
+            f"Short description database not found: {docs_root}. "
+            "Nothing to read for mode 'short'."
+        )
+
+    plugin_root = find_named_directory(
+        docs_root,
+        plugin_name,
+        "Plugin documentation",
+    )
+
+    wanted = canonical_name(skill_name)
+    matches = []
+
+    for path in sorted(
+        plugin_root.glob("desc_*.md"),
+        key=lambda item: item.name.lower(),
+    ):
+        logical_name = path.stem[len("desc_"):]
+        if canonical_name(logical_name) == wanted:
+            matches.append(path)
+
+    if len(matches) == 1:
+        return matches[0]
+
+    if len(matches) > 1:
+        choices = ", ".join(path.name for path in matches)
+        raise ValueError(
+            f"Ambiguous short description for '{skill_name}': {choices}"
+        )
+
+    available = ", ".join(
+        path.stem[len("desc_"):]
+        for path in sorted(
+            plugin_root.glob("desc_*.md"),
+            key=lambda item: item.name.lower(),
+        )
+    ) or "<none>"
+
+    raise FileNotFoundError(
+        f"Short description for skill '{skill_name}' was not found in "
+        f"{plugin_root}. Available: {available}"
+    )
+
+
+def resolve_plugins_dir_for_describe(
+    cfg: configparser.ConfigParser | None,
+    cli_value: str | None,
+) -> tuple[Path, str]:
+    if not is_auto(cli_value):
+        return expand_path(cli_value), "cli"
+
+    if cfg is not None:
+        ini_value = cfg["general"].get("plugins_dir", AUTO_VALUE)
+        if not is_auto(ini_value):
+            return expand_path(ini_value), "ini"
+
+    standard = gemini_root() / "config" / "plugins"
+
+    if standard.is_dir():
+        return standard.resolve(), "auto:standard"
+
+    try:
+        config_path, _ = discover_config_path()
+    except (FileNotFoundError, RuntimeError):
+        return standard.resolve(), "auto:derived"
+
+    return resolve_plugins_dir(cfg, AUTO_VALUE, config_path)
+
+
+def find_full_skill_file(
+    plugins_dir: Path,
+    plugin_name: str,
+    skill_name: str,
+) -> Path:
+    plugin_root = find_named_directory(
+        plugins_dir,
+        plugin_name,
+        "Installed plugin",
+    )
+
+    skill_files = sorted(
+        (
+            path
+            for path in plugin_root.rglob("SKILL.md")
+            if path.is_file()
+        ),
+        key=lambda path: str(path).lower(),
+    )
+
+    if not skill_files:
+        raise FileNotFoundError(
+            f"No SKILL.md files found under installed plugin: {plugin_root}"
+        )
+
+    wanted = canonical_name(skill_name)
+    matches = []
+
+    for path in skill_files:
+        parent = path.parent
+
+        if canonical_name(parent.name) == wanted:
+            matches.append(path)
+
+    if len(matches) == 1:
+        return matches[0]
+
+    if len(matches) > 1:
+        choices = ", ".join(
+            str(path.relative_to(plugin_root))
+            for path in matches
+        )
+        raise ValueError(
+            f"Ambiguous installed skill '{skill_name}'. Matches: {choices}"
+        )
+
+    if len(skill_files) == 1:
+        return skill_files[0]
+
+    available = ", ".join(
+        sorted(
+            {
+                path.parent.name
+                for path in skill_files
+                if path.parent != plugin_root
+            }
+        )
+    ) or "<root-level skills>"
+
+    raise FileNotFoundError(
+        f"Installed skill '{skill_name}' was not found under {plugin_root}. "
+        f"Available skill directories: {available}"
+    )
+
+
+def command_describe(
+    cfg: configparser.ConfigParser | None,
+    args,
+) -> int:
+    if args.mode == "short":
+        source = find_short_description(args.plugin, args.skill)
+        content = extract_markdown_summary(source)
+    else:
+        plugins_dir, plugins_source = resolve_plugins_dir_for_describe(
+            cfg,
+            args.plugins_dir,
+        )
+        source = find_full_skill_file(
+            plugins_dir,
+            args.plugin,
+            args.skill,
+        )
+
+        try:
+            content = source.read_text(encoding="utf-8-sig").strip()
+        except OSError as exc:
+            raise OSError(f"Could not read installed skill: {source}") from exc
+
+        print(f"Plugins dir : {plugins_dir} [{plugins_source}]")
+
+    print(f"Plugin      : {args.plugin}")
+    print(f"Skill       : {args.skill}")
+    print(f"Mode        : {args.mode}")
+    print(f"Source      : {source}")
+    print()
+    print(content)
+
+    return 0
+
 def calculate_profile_changes(
     data: dict,
     desired: dict[str, str],
@@ -941,6 +1189,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     disable.add_argument("plugin")
 
+    describe = sub.add_parser(
+        "describe",
+        help=(
+            "Show a short repository summary or the full installed "
+            "SKILL.md for one skill."
+        ),
+    )
+    describe.add_argument("plugin")
+    describe.add_argument("skill")
+    describe.add_argument(
+        "mode",
+        choices=("short", "full"),
+    )
+
     sub.add_parser(
         "on",
         help="Alias for apply full. Requires INI.",
@@ -960,6 +1222,10 @@ def main() -> int:
     try:
         ini_path = Path(args.ini).resolve()
         cfg = load_ini_optional(ini_path)
+
+        if args.command == "describe":
+            return command_describe(cfg, args)
+
         settings = get_settings(cfg, args)
 
         verbosity = (
@@ -1000,7 +1266,7 @@ def main() -> int:
         if cfg is None:            raise ValueError(
                 f"Command '{args.command}' requires "
                 f"INI file: {ini_path}. "
-                "Without INI use status, set, enable, or disable."
+                "Without INI use status, set, enable, disable, or describe."
             )
 
         if args.command == "profiles":
