@@ -4,6 +4,21 @@ Unofficial portable CLI for inspecting and managing Antigravity plugins, skills,
 
 Current version: `0.4`
 
+## Version history
+
+| Date | Version | Author | Changes |
+|---|---:|---|---|
+| 2026-09-20 | 0.1 | Leopoldius | Initial Python plugin status and profile manager. |
+| 2026-09-20 | 0.2 | Leopoldius | Added verbosity levels and nested skill/MCP inspection. |
+| 2026-09-20 | 0.3 | Leopoldius | Added standalone operation without INI and manual `set`, `enable`, and `disable` commands. |
+| 2026-09-20 | 0.4 | Leopoldius | Added path auto-discovery, explicit path overrides, version reporting, safe backups, and public research documentation. |
+
+The project uses simple incremental pre-1.0 versioning. The current version is stored directly in the script:
+
+```python
+VERSION = "0.4"
+```
+
 ## What it does
 
 `agy-plugin-manager` works directly with the Antigravity plugin configuration.
@@ -324,23 +339,6 @@ Other configuration content is preserved.
 1  General error
 2  Profile differs from current state, or profile contains missing plugins
 3  Profile apply refused because a managed plugin is missing
-```
-
-## Version history
-
-The project uses simple incremental pre-1.0 versioning.
-
-| Date | Version | Author | Changes |
-|---|---:|---|---|
-| 2026-09-20 | 0.1 | Leopoldius | Initial Python plugin status and profile manager. |
-| 2026-09-20 | 0.2 | Leopoldius | Added verbosity levels and nested skill/MCP inspection. |
-| 2026-09-20 | 0.3 | Leopoldius | Added standalone operation without INI and manual `set`, `enable`, and `disable` commands. |
-| 2026-09-20 | 0.4 | Leopoldius | Added path auto-discovery, explicit path overrides, version reporting, safe backups, and public research documentation. |
-
-The current version is stored directly in the script:
-
-```python
-VERSION = "0.4"
 ```
 
 ## Disclaimer
