@@ -66,25 +66,25 @@ Windows is the primary target.
 Show the current state:
 
 ```powershell
-python .\agy_plugins.py status
+python .\agy-plugins.py status
 ```
 
 Show nested skills and MCP-related files:
 
 ```powershell
-python .\agy_plugins.py -v 2 status
+python .\agy-plugins.py -v 2 status
 ```
 
 Show the full recursive plugin file tree:
 
 ```powershell
-python .\agy_plugins.py -v 3 status
+python .\agy-plugins.py -v 3 status
 ```
 
 Show the script version:
 
 ```powershell
-python .\agy_plugins.py --version
+python .\agy-plugins.py --version
 ```
 
 ## Standalone mode
@@ -103,20 +103,20 @@ disable
 Enable one plugin:
 
 ```powershell
-python .\agy_plugins.py enable gemini-api
+python .\agy-plugins.py enable gemini-api
 ```
 
 Disable one plugin:
 
 ```powershell
-python .\agy_plugins.py disable science
+python .\agy-plugins.py disable science
 ```
 
 Equivalent explicit form:
 
 ```powershell
-python .\agy_plugins.py set gemini-api on
-python .\agy_plugins.py set science off
+python .\agy-plugins.py set gemini-api on
+python .\agy-plugins.py set science off
 ```
 
 ## Profile mode
@@ -136,26 +136,26 @@ off
 List profiles:
 
 ```powershell
-python .\agy_plugins.py profiles
+python .\agy-plugins.py profiles
 ```
 
 Compare the current state with a profile:
 
 ```powershell
-python .\agy_plugins.py diff clean
+python .\agy-plugins.py diff clean
 ```
 
 Apply a profile:
 
 ```powershell
-python .\agy_plugins.py apply clean
+python .\agy-plugins.py apply clean
 ```
 
 Shortcuts:
 
 ```powershell
-python .\agy_plugins.py on
-python .\agy_plugins.py off
+python .\agy-plugins.py on
+python .\agy-plugins.py off
 ```
 
 `on` is an alias for `apply full`.
@@ -244,13 +244,13 @@ If several candidates match, the tool refuses to guess and asks for an explicit 
 CLI arguments have priority over INI settings and auto-discovery:
 
 ```powershell
-python .\agy_plugins.py --config D:\agy\config.json status
+python .\agy-plugins.py --config D:\agy\config.json status
 ```
 
 All paths can be overridden:
 
 ```powershell
-python .\agy_plugins.py \
+python .\agy-plugins.py \
   --config D:\agy\config.json \
   --plugins-dir D:\agy\plugins \
   --backup-dir D:\agy\backups \
@@ -271,10 +271,10 @@ The same paths can be set in `agy-plugins.ini`.
 Examples:
 
 ```powershell
-python .\agy_plugins.py -v 0 status
-python .\agy_plugins.py -v 1 status
-python .\agy_plugins.py -v 2 status
-python .\agy_plugins.py -v 3 status
+python .\agy-plugins.py -v 0 status
+python .\agy-plugins.py -v 1 status
+python .\agy-plugins.py -v 2 status
+python .\agy-plugins.py -v 3 status
 ```
 
 At verbosity 2, the tool recognizes entries such as:
