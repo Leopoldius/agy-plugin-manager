@@ -1,2 +1,340 @@
 # agy-plugin-manager
-Unofficial portable CLI for inspecting and managing Antigravity plugins, skills and plugin profiles. Auto-discovery, backups, verbosity levels and optional INI profiles.
+
+Unofficial portable CLI for inspecting and managing Antigravity plugins, skills, and plugin profiles.
+
+Current version: `0.4`
+
+## What it does
+
+`agy-plugin-manager` works directly with the Antigravity plugin configuration.
+
+It can:
+
+- auto-detect the local Antigravity configuration;
+- show which plugins are currently enabled or disabled;
+- inspect nested skills, MCP-related files, and plugin contents;
+- enable or disable individual plugins without an INI file;
+- compare the current state with named profiles;
+- apply reusable plugin profiles from an optional INI file;
+- create timestamped backups before changes;
+- validate JSON before replacing the active configuration.
+
+The tool does not depend on the location of `agy.exe` and does not invoke the Antigravity CLI.
+
+## Why
+
+Antigravity can inject plugin-provided skills, instructions, and tools into the model context.
+
+With many globally enabled plugins, even a small request can carry a large amount of recurring input context. Keeping only the plugins needed for a workflow can reduce that overhead and keep agent contexts cleaner.
+
+This project exists to make the active plugin state visible and easy to manage.
+
+## Requirements
+
+- Python 3.10 or newer
+- No third-party Python packages
+
+Windows is the primary target.
+
+## Quick start
+
+Show the current state:
+
+```powershell
+python .\agy_plugins.py status
+```
+
+Show nested skills and MCP-related files:
+
+```powershell
+python .\agy_plugins.py -v 2 status
+```
+
+Show the full recursive plugin file tree:
+
+```powershell
+python .\agy_plugins.py -v 3 status
+```
+
+Show the script version:
+
+```powershell
+python .\agy_plugins.py --version
+```
+
+## Standalone mode
+
+The INI file is optional.
+
+Without `agy-plugins.ini`, the following commands remain available:
+
+```text
+status
+set
+enable
+disable
+```
+
+Enable one plugin:
+
+```powershell
+python .\agy_plugins.py enable gemini-api
+```
+
+Disable one plugin:
+
+```powershell
+python .\agy_plugins.py disable science
+```
+
+Equivalent explicit form:
+
+```powershell
+python .\agy_plugins.py set gemini-api on
+python .\agy_plugins.py set science off
+```
+
+## Profile mode
+
+If `agy-plugins.ini` is present next to the script, profile management becomes available.
+
+Additional commands:
+
+```text
+profiles
+diff
+apply
+on
+off
+```
+
+List profiles:
+
+```powershell
+python .\agy_plugins.py profiles
+```
+
+Compare the current state with a profile:
+
+```powershell
+python .\agy_plugins.py diff clean
+```
+
+Apply a profile:
+
+```powershell
+python .\agy_plugins.py apply clean
+```
+
+Shortcuts:
+
+```powershell
+python .\agy_plugins.py on
+python .\agy_plugins.py off
+```
+
+`on` is an alias for `apply full`.
+
+`off` is an alias for `apply clean`.
+
+## INI format
+
+Example:
+
+```ini
+[general]
+config=auto
+plugins_dir=auto
+backup_dir=auto
+default_profile=clean
+backup=true
+verbosity=1
+
+[profile.clean]
+firebase=off
+science=off
+gemini-api=off
+
+[profile.full]
+firebase=on
+science=on
+gemini-api=on
+
+[profile.coding]
+firebase=off
+science=off
+google-antigravity-sdk=keep
+```
+
+Supported profile values:
+
+```text
+on
+off
+keep
+```
+
+Meaning:
+
+```text
+on    -> set enabled=true
+off   -> set enabled=false
+keep  -> leave the current state unchanged
+```
+
+## Auto-discovery
+
+By default:
+
+```ini
+config=auto
+plugins_dir=auto
+backup_dir=auto
+```
+
+The tool first checks the standard location:
+
+```text
+~/.gemini/config/config.json
+```
+
+On Windows this normally resolves to:
+
+```text
+C:\Users\<user>\.gemini\config\config.json
+```
+
+If the standard file is not usable, the tool performs a bounded search under:
+
+```text
+~/.gemini
+```
+
+A candidate must contain a top-level `plugins` object with at least one plugin that has a boolean `enabled` field.
+
+If several candidates match, the tool refuses to guess and asks for an explicit path.
+
+## Explicit path overrides
+
+CLI arguments have priority over INI settings and auto-discovery:
+
+```powershell
+python .\agy_plugins.py --config D:\agy\config.json status
+```
+
+All paths can be overridden:
+
+```powershell
+python .\agy_plugins.py \
+  --config D:\agy\config.json \
+  --plugins-dir D:\agy\plugins \
+  --backup-dir D:\agy\backups \
+  status
+```
+
+The same paths can be set in `agy-plugins.ini`.
+
+## Verbosity
+
+```text
+0  Summary only
+1  Top-level plugin table
+2  Plugins plus recognized nested skills, MCP files, and instructions
+3  Full recursive plugin file tree
+```
+
+Examples:
+
+```powershell
+python .\agy_plugins.py -v 0 status
+python .\agy_plugins.py -v 1 status
+python .\agy_plugins.py -v 2 status
+python .\agy_plugins.py -v 3 status
+```
+
+At verbosity 2, the tool recognizes entries such as:
+
+```text
+SKILL.md
+instructions.md
+instruction.md
+MCP-related JSON, YAML, and Markdown files
+```
+
+Nested entries inherit the current ON/OFF state of the parent plugin. Individual nested skills are not independently enabled or disabled by this tool.
+
+## Status values
+
+With a profile:
+
+```text
+OK          Current state matches the profile
+DIFF        Current state differs from the profile
+KEEP        Profile intentionally leaves the plugin unchanged
+MISSING     Profile references a plugin not present in the config
+UNMANAGED   Plugin exists but is not listed in the selected profile
+```
+
+Without a profile:
+
+```text
+CURRENT
+```
+
+is used because there is no desired state to compare against.
+
+## Backups and safe writes
+
+Before a change, the tool creates a timestamped backup by default.
+
+Typical location:
+
+```text
+~/.gemini/config/backups/config.YYYYMMDD-HHMMSS.json
+```
+
+Write flow:
+
+```text
+read current config
+-> modify in memory
+-> create backup
+-> write temporary JSON
+-> parse temporary JSON again
+-> atomically replace the original config
+```
+
+Only the selected plugin `enabled` values are intentionally changed.
+
+Other configuration content is preserved.
+
+## Exit codes
+
+```text
+0  Success
+1  General error
+2  Profile differs from current state, or profile contains missing plugins
+3  Profile apply refused because a managed plugin is missing
+```
+
+## Versioning
+
+The project currently uses simple incremental pre-1.0 versioning:
+
+```text
+0.1 -> 0.2 -> 0.3 -> 0.4 -> ...
+```
+
+The current version is stored directly in the script:
+
+```python
+VERSION = "0.4"
+```
+
+## Disclaimer
+
+This is an independent community project.
+
+It is not affiliated with, endorsed by, or maintained by Google, Google DeepMind, Gemini, or the Antigravity team.
+
+Antigravity configuration formats, plugin layouts, and internal behavior may change between releases.
