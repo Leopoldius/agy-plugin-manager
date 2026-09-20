@@ -4,6 +4,25 @@
 
 Detailed release notes for `agy-plugin-manager`.
 
+## 0.6
+
+Date: 2026-09-20
+
+- python-package - Converted the project into an installable Python package under `src/agy_plugin_manager`.
+- console-entry-point - Added the cross-platform `agy-plugins` console command.
+- compatibility-launcher - Kept `agy-plugins.py` as a source-checkout launcher for the existing workflow.
+- packaged-short-database - Bundled the `docs/plugins` short-description database with installed packages.
+- source-database-preference - Source checkouts continue to read the canonical `docs/plugins` tree before falling back to packaged data.
+- packaged-default-profile - Bundled the default `agy-plugins.ini` so profile commands remain available after package installation.
+- linux-standalone-installer - Added `install.sh` with a user-local isolated virtual environment and launcher.
+- windows-standalone-installer - Added `install.ps1` with an isolated virtual environment and user PATH setup.
+- standalone-uninstallers - Added Linux and Windows uninstall scripts.
+- pipx-installation - Added packaging support for isolated installation with pipx.
+- uv-tool-installation - Added packaging support for isolated installation with `uv tool`.
+- linux-distribution-support - Added a common installation path for Debian/Ubuntu, Fedora, Arch, and similar Linux distributions.
+- self-info - Added installation diagnostics showing version, installation type, executable, package path, short database, INI, Python, and platform.
+- version-update - Bumped the package and README version to `0.6`.
+
 ## 0.5
 
 Date: 2026-09-20
