@@ -2,7 +2,7 @@
 
 Unofficial portable CLI for inspecting and managing Antigravity plugins, skills, and plugin profiles.
 
-Current version: `0.4`
+Current version: `0.6`
 
 ## Version history
 
@@ -12,11 +12,16 @@ Current version: `0.4`
 | 2026-09-20 | 0.2 | Leopoldius | Added verbosity levels and nested skill/MCP inspection. |
 | 2026-09-20 | 0.3 | Leopoldius | Added standalone operation without INI and manual `set`, `enable`, and `disable` commands. |
 | 2026-09-20 | 0.4 | Leopoldius | Added path auto-discovery, explicit path overrides, version reporting, safe backups, and public research documentation. |
+| 2026-09-20 | 0.5 | Leopoldius | Added `describe` with `short` summaries from `docs/plugins` and `full` output from installed `SKILL.md` files. |
+| 2026-09-20 | 0.6 | Leopoldius | Added cross-platform Python packaging, Linux/Windows standalone installers, pipx/uv tool support, packaged short-description data, and `self-info`. |
 
-The project uses simple incremental pre-1.0 versioning. The current version is stored directly in the script:
+Detailed per-version feature notes: [Versions.md](Versions.md)
+
+The project uses simple incremental pre-1.0 versioning. The package version is defined in:
 
 ```python
-VERSION = "0.4"
+# src/agy_plugin_manager/__init__.py
+__version__ = "0.6"
 ```
 
 ## What it does
@@ -32,7 +37,9 @@ It can:
 - compare the current state with named profiles;
 - apply reusable plugin profiles from an optional INI file;
 - create timestamped backups before changes;
-- validate JSON before replacing the active configuration.
+- validate JSON before replacing the active configuration;
+- show short local skill summaries from `docs/plugins` or packaged data, or full installed `SKILL.md` content;
+- install as the cross-platform `agy-plugins` command through standalone installers, pipx, uv tool, or a normal Python package installation.
 
 The tool does not depend on the location of `agy.exe` and does not invoke the Antigravity CLI.
 
@@ -59,7 +66,11 @@ Local usernames, workspace paths, and other user-specific identifiers in the pub
 - Python 3.10 or newer
 - No third-party Python packages
 
-Windows is the primary target.
+Windows and Linux are supported. Linux support targets normal Python 3.10+ environments on Debian/Ubuntu, Fedora, Arch, and similar distributions.
+
+## Installation
+
+See [INSTALL.md](INSTALL.md) for standalone, pipx, uv tool, Windows, Linux, and uninstall instructions.
 
 ## Quick start
 
@@ -87,6 +98,34 @@ Show the script version:
 python .\agy-plugins.py --version
 ```
 
+## Skill descriptions
+
+Version 0.5 adds the `describe` command:
+
+```text
+describe <plugin> <skill> short|full
+```
+
+Use `short` to read the high-level summary from the source checkout's `docs/plugins` database or, for an installed package, from the packaged copy of that database:
+
+```powershell
+python .\agy-plugins.py describe science pubmed-database short
+```
+
+Only the `## Summary` section is printed. If neither the source database nor the packaged database is available, the command fails instead of guessing or downloading anything.
+
+Use `full` to read the original installed skill documentation from the locally installed plugin tree:
+
+```powershell
+python .\agy-plugins.py describe science pubmed-database full
+```
+
+For `full`, the plugin directory is resolved from `--plugins-dir`, the INI setting, or the standard local Antigravity/Gemini plugin location. The command searches the selected installed plugin for `SKILL.md`.
+
+Plugin and skill matching treats `-` and `_` as equivalent. For plugins that contain exactly one `SKILL.md`, that file is used when no directory-name match is available.
+
+The `short` mode does not require an INI file or an installed Antigravity configuration. The `full` mode requires the selected plugin to be installed locally.
+
 ## Standalone mode
 
 The INI file is optional.
@@ -98,6 +137,8 @@ status
 set
 enable
 disable
+describe
+self-info
 ```
 
 Enable one plugin:
@@ -118,6 +159,22 @@ Equivalent explicit form:
 python .\agy-plugins.py set gemini-api on
 python .\agy-plugins.py set science off
 ```
+
+## Installation diagnostics
+
+Show how the current copy was installed and where its resources resolve:
+
+```text
+agy-plugins self-info
+```
+
+From a source checkout:
+
+```powershell
+python .\agy-plugins.py self-info
+```
+
+The output includes the tool version, detected installation type, executable path, package path, short-description database, default INI path, Python version, and platform.
 
 ## Profile mode
 
@@ -250,11 +307,7 @@ python .\agy-plugins.py --config D:\agy\config.json status
 All paths can be overridden:
 
 ```powershell
-python .\agy-plugins.py \
-  --config D:\agy\config.json \
-  --plugins-dir D:\agy\plugins \
-  --backup-dir D:\agy\backups \
-  status
+python .\agy-plugins.py --config D:\agy\config.json --plugins-dir D:\agy\plugins --backup-dir D:\agy\backups status
 ```
 
 The same paths can be set in `agy-plugins.ini`.

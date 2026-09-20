@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agy-plugin-manager"
+version = "0.6"
+description = "Unofficial portable CLI for inspecting and managing Antigravity plugins, skills, and plugin profiles."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Leopoldius" }
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13"
+]
+dependencies = []
+
+[project.scripts]
+agy-plugins = "agy_plugin_manager.cli:main"
+
+[project.urls]
+Repository = "https://github.com/Leopoldius/agy-plugin-manager"
+Documentation = "https://github.com/Leopoldius/agy-plugin-manager/tree/main/docs"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+agy_plugin_manager = [
+  "data/agy-plugins.ini",
+  "data/plugins/*.md",
+  "data/plugins/*/*.md"
+]
