@@ -70,75 +70,7 @@ Windows and Linux are supported. Linux support targets normal Python 3.10+ envir
 
 ## Installation
 
-### Standalone installer
-
-The standalone installer creates an isolated virtual environment for the tool and exposes the `agy-plugins` command.
-
-Linux:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Leopoldius/agy-plugin-manager/main/install.sh -o /tmp/agy-plugin-manager-install.sh
-sh /tmp/agy-plugin-manager-install.sh
-```
-
-Default Linux locations:
-
-```text
-~/.local/share/agy-plugin-manager/venv/
-~/.local/bin/agy-plugins
-```
-
-Windows PowerShell:
-
-```powershell
-Invoke-WebRequest https://raw.githubusercontent.com/Leopoldius/agy-plugin-manager/main/install.ps1 -OutFile $env:TEMP\agy-plugin-manager-install.ps1
-& $env:TEMP\agy-plugin-manager-install.ps1
-```
-
-Default Windows locations:
-
-```text
-%LOCALAPPDATA%\agy-plugin-manager\venv\
-%LOCALAPPDATA%\agy-plugin-manager\bin\agy-plugins.cmd
-```
-
-The Windows installer adds its `bin` directory to the user PATH when needed. The Linux installer uses the standard user-local `~/.local/bin` location and warns if that directory is not already in PATH.
-
-To test a non-default branch from a local checkout:
-
-```bash
-AGY_PLUGIN_MANAGER_REF=develop ./install.sh
-```
-
-```powershell
-.\install.ps1 -Ref develop
-```
-
-Uninstall standalone installations with `uninstall.sh` or `uninstall.ps1`.
-
-### pipx
-
-Until a PyPI release is published, install directly from the GitHub archive:
-
-```bash
-pipx install https://github.com/Leopoldius/agy-plugin-manager/archive/refs/heads/main.zip
-```
-
-The same command works from PowerShell when `pipx` is installed.
-
-### uv tool
-
-Linux or Windows:
-
-```text
-uv tool install https://github.com/Leopoldius/agy-plugin-manager/archive/refs/heads/main.zip
-```
-
-All installed forms expose the same command:
-
-```text
-agy-plugins
-```
+See [INSTALL.md](INSTALL.md) for standalone, pipx, uv tool, Windows, Linux, and uninstall instructions.
 
 ## Quick start
 
