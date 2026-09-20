@@ -50,6 +50,7 @@ The repository includes empirical reverse-engineering and usage notes collected 
 
 - [Antigravity CLI internals](docs/antigravity_internal.md)
 - [Antigravity CLI usage and quota behavior](docs/antigravity_usage.md)
+- [Plugin skill summaries](docs/plugins/README.md)
 
 Local usernames, workspace paths, and other user-specific identifiers in the published notes are anonymized.
 
