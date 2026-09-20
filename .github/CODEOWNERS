@@ -1,0 +1,5 @@
+# Repository-wide ownership
+* @Leopoldius
+
+# Keep repository policy and automation under the same owner.
+/.github/ @Leopoldius
