@@ -2,7 +2,7 @@
 
 Unofficial portable CLI for inspecting and managing Antigravity plugins, skills, and plugin profiles.
 
-Current version: `0.4`
+Current version: `0.5`
 
 ## Version history
 
@@ -12,11 +12,12 @@ Current version: `0.4`
 | 2026-09-20 | 0.2 | Leopoldius | Added verbosity levels and nested skill/MCP inspection. |
 | 2026-09-20 | 0.3 | Leopoldius | Added standalone operation without INI and manual `set`, `enable`, and `disable` commands. |
 | 2026-09-20 | 0.4 | Leopoldius | Added path auto-discovery, explicit path overrides, version reporting, safe backups, and public research documentation. |
+| 2026-09-20 | 0.5 | Leopoldius | Added `describe` with `short` summaries from `docs/plugins` and `full` output from installed `SKILL.md` files. |
 
 The project uses simple incremental pre-1.0 versioning. The current version is stored directly in the script:
 
 ```python
-VERSION = "0.4"
+VERSION = "0.5"
 ```
 
 ## What it does
@@ -32,7 +33,8 @@ It can:
 - compare the current state with named profiles;
 - apply reusable plugin profiles from an optional INI file;
 - create timestamped backups before changes;
-- validate JSON before replacing the active configuration.
+- validate JSON before replacing the active configuration;
+- show short local skill summaries from `docs/plugins` or full installed `SKILL.md` content.
 
 The tool does not depend on the location of `agy.exe` and does not invoke the Antigravity CLI.
 
@@ -87,6 +89,34 @@ Show the script version:
 python .\agy-plugins.py --version
 ```
 
+## Skill descriptions
+
+Version 0.5 adds the `describe` command:
+
+```text
+describe <plugin> <skill> short|full
+```
+
+Use `short` to read the high-level summary from this repository's local description database under `docs/plugins`:
+
+```powershell
+python .\agy-plugins.py describe science pubmed-database short
+```
+
+Only the `## Summary` section is printed. If the `docs/plugins` database is not present next to the script, the command fails instead of guessing or downloading anything.
+
+Use `full` to read the original installed skill documentation from the locally installed plugin tree:
+
+```powershell
+python .\agy-plugins.py describe science pubmed-database full
+```
+
+For `full`, the plugin directory is resolved from `--plugins-dir`, the INI setting, or the standard local Antigravity/Gemini plugin location. The command searches the selected installed plugin for `SKILL.md`.
+
+Plugin and skill matching treats `-` and `_` as equivalent. For plugins that contain exactly one `SKILL.md`, that file is used when no directory-name match is available.
+
+The `short` mode does not require an INI file or an installed Antigravity configuration. The `full` mode requires the selected plugin to be installed locally.
+
 ## Standalone mode
 
 The INI file is optional.
@@ -98,6 +128,7 @@ status
 set
 enable
 disable
+describe
 ```
 
 Enable one plugin:
