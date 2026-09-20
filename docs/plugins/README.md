@@ -6,6 +6,34 @@ This section contains unofficial, high-level summaries of locally observed Antig
 
 Original plugin files, detailed prompt text, source code, credentials, private paths, and internal operational instructions are intentionally not reproduced.
 
+## Source layout mapping
+
+The groups documented here correspond to plugin directories observed under the local Gemini configuration tree:
+
+```text
+~/.gemini/config/plugins/<plugin_name>/
+```
+
+On Windows, the same location is typically:
+
+```text
+%USERPROFILE%\.gemini\config\plugins\<plugin_name>\
+```
+
+The documentation folders intentionally reuse the same plugin/group names:
+
+```text
+docs/plugins/<plugin_name>/
+```
+
+Each `desc_<skill_name>.md` page corresponds to a skill discovered in the installed plugin tree, typically from a source layout like:
+
+```text
+~/.gemini/config/plugins/<plugin_name>/skills/<skill_name>/SKILL.md
+```
+
+So the documentation mirrors the plugin grouping and skill naming, while keeping only independent high-level summaries instead of copying the original plugin files.
+
 ## Groups
 
 - [android-cli-plugin](android-cli-plugin/README.md) - Android command-line development support, including project, device, emulator, SDK, and documentation workflows. (1 skill)
