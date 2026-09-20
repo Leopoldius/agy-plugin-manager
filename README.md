@@ -29,6 +29,15 @@ With many globally enabled plugins, even a small request can carry a large amoun
 
 This project exists to make the active plugin state visible and easy to manage.
 
+## Documentation
+
+The repository includes empirical reverse-engineering and usage notes collected while testing Antigravity CLI 1.2.7:
+
+- [Antigravity CLI internals](docs/antigravity_internal.md)
+- [Antigravity CLI usage and quota behavior](docs/antigravity_usage.md)
+
+Local usernames, workspace paths, and other user-specific identifiers in the published notes are anonymized.
+
 ## Requirements
 
 - Python 3.10 or newer
@@ -317,13 +326,16 @@ Other configuration content is preserved.
 3  Profile apply refused because a managed plugin is missing
 ```
 
-## Versioning
+## Version history
 
-The project currently uses simple incremental pre-1.0 versioning:
+The project uses simple incremental pre-1.0 versioning.
 
-```text
-0.1 -> 0.2 -> 0.3 -> 0.4 -> ...
-```
+| Date | Version | Author | Changes |
+|---|---:|---|---|
+| 2026-09-20 | 0.1 | Leopoldius | Initial Python plugin status and profile manager. |
+| 2026-09-20 | 0.2 | Leopoldius | Added verbosity levels and nested skill/MCP inspection. |
+| 2026-09-20 | 0.3 | Leopoldius | Added standalone operation without INI and manual `set`, `enable`, and `disable` commands. |
+| 2026-09-20 | 0.4 | Leopoldius | Added path auto-discovery, explicit path overrides, version reporting, safe backups, and public research documentation. |
 
 The current version is stored directly in the script:
 
