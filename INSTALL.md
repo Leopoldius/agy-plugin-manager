@@ -6,14 +6,9 @@ This document contains installation, validation, and removal instructions for `a
 
 ## Current release status
 
-Current development version: `0.6`.
+Current release version: `0.6`.
 
-Version `0.6` is currently being validated on the `develop` branch before promotion to `main`.
-
-Until `0.6` is merged to `main`:
-
-- use `develop` when testing the new installers and package layout;
-- commands that explicitly reference `main` install the currently released main-branch version instead.
+Version `0.6` is released from the `main` branch. Ongoing development continues on `develop`.
 
 ## Requirements
 
@@ -61,7 +56,7 @@ Invoke-WebRequest https://raw.githubusercontent.com/Leopoldius/agy-plugin-manage
 & $env:TEMP\agy-plugin-manager-install.ps1
 ```
 
-While version `0.6` is still on `develop`, test it from a source checkout with:
+To test the current `develop` branch from a source checkout:
 
 ```powershell
 .\install.ps1 -Ref develop
@@ -102,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/Leopoldius/agy-plugin-manager/main/
 sh /tmp/agy-plugin-manager-install.sh
 ```
 
-While version `0.6` is still on `develop`, test it from a source checkout with:
+To test the current `develop` branch from a source checkout:
 
 ```bash
 AGY_PLUGIN_MANAGER_REF=develop ./install.sh
@@ -185,7 +180,7 @@ For the currently released `main` branch:
 pipx install https://github.com/Leopoldius/agy-plugin-manager/archive/refs/heads/main.zip
 ```
 
-For version `0.6` testing from a local `develop` checkout:
+For development testing from a local checkout:
 
 ```text
 pipx install . --force
