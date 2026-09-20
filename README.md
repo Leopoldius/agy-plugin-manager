@@ -14,6 +14,8 @@ Current version: `0.5`
 | 2026-09-20 | 0.4 | Leopoldius | Added path auto-discovery, explicit path overrides, version reporting, safe backups, and public research documentation. |
 | 2026-09-20 | 0.5 | Leopoldius | Added `describe` with `short` summaries from `docs/plugins` and `full` output from installed `SKILL.md` files. |
 
+Detailed per-version feature notes: [Versions.md](Versions.md)
+
 The project uses simple incremental pre-1.0 versioning. The current version is stored directly in the script:
 
 ```python
